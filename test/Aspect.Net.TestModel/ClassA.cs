@@ -6,6 +6,9 @@ namespace Aspect.Net.TestModel
 {
     public class ClassA
     {
-
+        public virtual bool Call()
+        {
+            return false;
+        }
     }
 }
