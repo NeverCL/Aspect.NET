@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Aspect.Net.xUnitTest
 {
-    public class ProxyTests
+    public class ProxyCreateTests
     {
         [Fact]
         public void EmptyCreate_ClassA_ClassA()
@@ -19,7 +19,7 @@ namespace Aspect.Net.xUnitTest
         }
 
         [Fact]
-        public void DefaultCreate_ClassA_ClassA()
+        public void DefaultCreate_ClassA_NotClassA()
         {
             var proxy = new Proxy(new DefaultAspect());
 
