@@ -25,7 +25,6 @@ namespace Aspect.Net
 
         public async Task InvokeAsync()
         {
-            //var method = Instance.GetType().GetMethod(ProxyMethod.Name + "_Proxy", BindingFlags.NonPublic | BindingFlags.Instance);
             var method = ProxyMethod;
             var arguments = Arguments;
             var instance = Instance;

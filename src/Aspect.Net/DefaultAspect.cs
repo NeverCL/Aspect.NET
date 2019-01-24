@@ -17,9 +17,13 @@ namespace Aspect.Net
         public async Task InvokeAsync(AspectContext context)
         {
             Debug.WriteLine("start:" + DateTime.Now.ToLongTimeString());
-            if (_innerFunc != null)
+            if (_innerFunc != null) 
             {
                 await _innerFunc(context);
+            }
+            else
+            {
+                await context.InvokeAsync();
             }
             Debug.WriteLine("end:" + DateTime.Now.ToLongTimeString());
         }

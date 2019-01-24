@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Aspect.Net.TestModel;
+﻿using Aspect.Net.TestModel;
 using Xunit;
 
 namespace Aspect.Net.xUnitTest
@@ -22,9 +19,7 @@ namespace Aspect.Net.xUnitTest
         public void DefaultCreate_ClassA_NotClassA()
         {
             var proxy = new Proxy(new DefaultAspect());
-
             var a = proxy.Create<ClassA>();
-
             Assert.True(a.GetType() != typeof(ClassA));
         }
     }
