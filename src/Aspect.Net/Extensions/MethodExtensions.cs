@@ -38,22 +38,12 @@ namespace Aspect.Net.Extensions
             {
                 callExpression = Expression.Call(methodInfo, paramExpressions);
             }
-            else if (IsTaskResult(methodInfo))
-            {
-                //async ()=> await 
-                callExpression = Expression.Call(Expression.Constant(instance), methodInfo, paramExpressions);
-            }
             else
             {
                 callExpression = Expression.Call(Expression.Constant(instance), methodInfo, paramExpressions);
             }
             var lambdaExpression = Expression.Lambda(callExpression, paramExpressions);
             return lambdaExpression.Compile();
-        }
-
-        private static bool IsTaskResult(MethodInfo methodInfo)
-        {
-            return methodInfo.ReturnType.IsGenericType && methodInfo.ReturnType.BaseType == typeof(Task);
         }
     }
 }
