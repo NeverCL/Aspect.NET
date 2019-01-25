@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
+using System.Threading.Tasks;
 using Aspect.Net.Extensions;
 
 namespace Aspect.Net
@@ -108,19 +109,21 @@ namespace Aspect.Net
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldfld, aspectField);
             il.Emit(OpCodes.Ldloc_1);
-            il.Emit(OpCodes.Call, typeof(IAspect).GetMethod("InvokeAsync"));
+            il.Emit(OpCodes.Callvirt, typeof(IAspect).GetMethod("InvokeAsync"));
+            il.DeclareLocal(typeof(Task));
+            il.Emit(OpCodes.Stloc_2);
 
             if (methodInfo.ReturnType == typeof(void))
             {
-                il.Emit(OpCodes.Pop);
+                // void
             }
             else
             {
-                ilGenerator.Emit(OpCodes.Ldloc_1);
-                ilGenerator.Emit(OpCodes.Call, typeof(AspectContext).GetProperty("ReturnValue").GetGetMethod());
+                il.Emit(OpCodes.Ldloc_1);
+                il.Emit(OpCodes.Call, typeof(AspectContext).GetProperty("ReturnValue").GetGetMethod());
                 if (methodInfo.ReturnType.IsValueType)
                 {
-                    ilGenerator.Emit(OpCodes.Unbox_Any, methodInfo.ReturnType);
+                    il.Emit(OpCodes.Unbox_Any, methodInfo.ReturnType);
                 }
             }
 

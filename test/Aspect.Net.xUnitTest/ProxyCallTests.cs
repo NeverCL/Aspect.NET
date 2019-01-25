@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Aspect.Net.TestModel;
 using Xunit;
 
@@ -21,7 +22,7 @@ namespace Aspect.Net.xUnitTest
         {
             var proxy = new Proxy(new DefaultAspect(ctx =>
             {
-                ctx.ReturnValue = false;
+                ctx.ReturnValue = true;
                 return Task.CompletedTask;
             }));
 
@@ -37,7 +38,7 @@ namespace Aspect.Net.xUnitTest
 
             var a = proxy.Create<ClassA>();
 
-            Assert.True(a.Call());
+            Assert.False(a.Call());
         }
     }
 }
