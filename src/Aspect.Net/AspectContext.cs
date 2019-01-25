@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Aspect.Net.Extensions;
 
 namespace Aspect.Net
 {
@@ -28,23 +29,18 @@ namespace Aspect.Net
             var method = ProxyMethod;
             var arguments = Arguments;
             var instance = Instance;
+            var del = method.BuildDynamicDelegate(instance);
             if (method.ReturnType == typeof(Task))
             {
                 //taskFunc = (Func<Task>)Delegate.CreateDelegate(typeof(Func<Task>), instance, method);
                 //taskFunc = method.CreateDelegate(typeof(Func<Task>),null);
                 //await taskFunc();
-                await (Task)method.Invoke(instance, arguments);
+                //await (Task)method.Invoke(instance, arguments);
+                await (Task) del.DynamicInvoke(arguments);
             }
             else
             {
-                if (arguments.Any())
-                {
-                    method.Invoke(instance, arguments);
-                }
-                else
-                {
-                    ReturnValue = method.Invoke(instance, null);
-                }
+                ReturnValue = del.DynamicInvoke(arguments);
             }
         }
     }
