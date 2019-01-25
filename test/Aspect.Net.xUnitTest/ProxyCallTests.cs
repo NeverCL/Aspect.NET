@@ -110,5 +110,36 @@ namespace Aspect.Net.xUnitTest
 
             Assert.NotEqual(str, act);
         }
+
+        [Fact]
+        public async Task DefaultCreate_ClassA_CallBoolAsync_Bool()
+        {
+            var proxy = new Proxy(new DefaultAspect());
+            var a = proxy.Create<ClassA>();
+
+            var act = await a.CallBoolArgBoolReturnAsync(true);
+
+            Assert.True(act);
+        }
+
+        [Fact]
+        public void DefaultCreate_ClassA_CallStr_Str()
+        {
+            var proxy = new Proxy(new DefaultAspect());
+            var a = proxy.Create<ClassA>();
+
+            var act = a.CallStrArgStrReturn("hi");
+
+            Assert.True(act == "hi");
+        }
+
+        [Fact]
+        public void DefaultCreate_ClassA_CallNoArg()
+        {
+            var proxy = new Proxy(new DefaultAspect());
+            var a = proxy.Create<ClassA>();
+
+            a.CallNoArg();
+        }
     }
 }

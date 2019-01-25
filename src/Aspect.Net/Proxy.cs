@@ -116,10 +116,10 @@ namespace Aspect.Net
                 il.Emit(OpCodes.Pop);
                 il.Emit(OpCodes.Ldloc_1);
                 il.Emit(OpCodes.Call, typeof(AspectContext).GetProperty("ReturnValue")?.GetGetMethod());
-                if (methodInfo.ReturnType.IsValueType)
-                {
-                    il.Emit(OpCodes.Unbox_Any, methodInfo.ReturnType);
-                }
+                //if (methodInfo.ReturnType.IsValueType)
+                //{
+                //    il.Emit(OpCodes.Unbox_Any, methodInfo.ReturnType);
+                //}
                 il.Emit(OpCodes.Ret);
             }
             return typeBuilder;
