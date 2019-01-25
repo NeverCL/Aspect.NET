@@ -53,31 +53,9 @@ namespace Aspect.Net
                 throw new ArgumentNullException(nameof(methodInfo));
             }
 
-            #region DefineRealProxy
-            var proxyMethodBuilder = typeBuilder.DefineMethod(AspectConsts.GetProxyMethodName(methodInfo.Name),
-                AspectConsts.InternalMethodAttributes,
-                methodInfo.CallingConvention,
-                methodInfo.ReturnType,
-                methodInfo.GetParameterTypes());
-            var ilGenerator = proxyMethodBuilder.GetILGenerator();
             var parameters = methodInfo.GetParameters();
-            if (parameters.Any())
-            {
-                ilGenerator.Emit(OpCodes.Ldarg_0);
-                for (int i = 0; i < parameters.Length; i++)
-                {
-                    ilGenerator.Emit(OpCodes.Ldarg, i + 1);
-                }
-            }
-            else
-            {
-                ilGenerator.Emit(OpCodes.Ldarg_0);
-            }
 
-            ilGenerator.Emit(OpCodes.Call, methodInfo);
-
-            ilGenerator.Emit(OpCodes.Ret);
-            #endregion
+            MethodBuilder proxyMethodBuilder = BuilderProxyMethod(typeBuilder, methodInfo, parameters);
 
             var methodBuilder = typeBuilder.DefineMethod(methodInfo.Name, AspectConsts.OverrideMethodAttributes,
                 methodInfo.CallingConvention, methodInfo.ReturnType, methodInfo.GetParameterTypes());
@@ -105,7 +83,6 @@ namespace Aspect.Net
             il.DeclareLocal(typeof(AspectContext));
             il.Emit(OpCodes.Stloc_1);
 
-            // ITaskAspect.InvokeAsync(context)
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldfld, aspectField);
             il.Emit(OpCodes.Ldloc_1);
@@ -113,8 +90,7 @@ namespace Aspect.Net
             var rtnType = methodInfo.ReturnType;
             invokeMethod = invokeMethod?.MakeGenericMethod(GetGenericType(rtnType));
             il.Emit(OpCodes.Callvirt, invokeMethod);
-            //il.DeclareLocal(typeof(Task));
-            //il.Emit(OpCodes.Stloc_2);
+
             if (methodInfo.ReturnType == typeof(void))
             {
                 // void
@@ -122,9 +98,10 @@ namespace Aspect.Net
                 il.Emit(OpCodes.Ret);
                 return typeBuilder;
             }
+
             if (methodInfo.ReturnType.IsValueType)
             {
-                var method = typeof(Task<>).MakeGenericType(rtnType).GetProperty("Result").GetGetMethod();
+                var method = typeof(Task<>).MakeGenericType(rtnType).GetProperty("Result")?.GetGetMethod();
                 il.Emit(OpCodes.Callvirt, method);
                 il.Emit(OpCodes.Ret);
                 return typeBuilder;
@@ -138,7 +115,7 @@ namespace Aspect.Net
             {
                 il.Emit(OpCodes.Pop);
                 il.Emit(OpCodes.Ldloc_1);
-                il.Emit(OpCodes.Call, typeof(AspectContext).GetProperty("ReturnValue").GetGetMethod());
+                il.Emit(OpCodes.Call, typeof(AspectContext).GetProperty("ReturnValue")?.GetGetMethod());
                 if (methodInfo.ReturnType.IsValueType)
                 {
                     il.Emit(OpCodes.Unbox_Any, methodInfo.ReturnType);
@@ -146,6 +123,33 @@ namespace Aspect.Net
                 il.Emit(OpCodes.Ret);
             }
             return typeBuilder;
+        }
+
+        private static MethodBuilder BuilderProxyMethod(TypeBuilder typeBuilder, MethodInfo methodInfo, ParameterInfo[] parameters)
+        {
+            var proxyMethodBuilder = typeBuilder.DefineMethod(AspectConsts.GetProxyMethodName(methodInfo.Name),
+                AspectConsts.InternalMethodAttributes,
+                methodInfo.CallingConvention,
+                methodInfo.ReturnType,
+                methodInfo.GetParameterTypes());
+            var ilGenerator = proxyMethodBuilder.GetILGenerator();
+            if (parameters.Any())
+            {
+                ilGenerator.Emit(OpCodes.Ldarg_0);
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    ilGenerator.Emit(OpCodes.Ldarg, i + 1);
+                }
+            }
+            else
+            {
+                ilGenerator.Emit(OpCodes.Ldarg_0);
+            }
+
+            ilGenerator.Emit(OpCodes.Call, methodInfo);
+
+            ilGenerator.Emit(OpCodes.Ret);
+            return proxyMethodBuilder;
         }
 
         private Type GetGenericType(Type rtnType)

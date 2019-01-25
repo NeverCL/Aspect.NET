@@ -98,5 +98,17 @@ namespace Aspect.Net.xUnitTest
 
             Assert.Equal(str, act);
         }
+
+        [Fact]
+        public async Task DefaultCreate_ClassA_CallAsync_String()
+        {
+            var str = Guid.NewGuid().ToString();
+            var proxy = new Proxy(new DefaultAspect());
+            var a = proxy.Create<ClassA>();
+
+            var act = await a.CallStrReturnAsync();
+
+            Assert.NotEqual(str, act);
+        }
     }
 }

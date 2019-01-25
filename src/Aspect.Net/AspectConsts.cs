@@ -6,10 +6,13 @@ using System.Text;
 
 namespace Aspect.Net
 {
-    public class AspectConsts
+    public static class AspectConsts
     {
-        public const string AssemblyName = "As";
-        public const string ModuleName = "As";
+        public const string AssemblyName = "Aspect.Net";
+
+        public const string ModuleName = nameof(Proxy);
+
+        private static readonly string TypeNamespace = string.Join(".", AssemblyName, ModuleName, "Generated");
 
         public const MethodAttributes OverrideMethodAttributes = MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.Public;
 
@@ -21,7 +24,7 @@ namespace Aspect.Net
 
         public static string GetTypeName(string typeName)
         {
-            return typeName + "_Proxy";
+            return string.Join(",", TypeNamespace, typeName);
         }
 
         public static readonly IEnumerable<string> ExcludeMethods = new[]
@@ -31,11 +34,10 @@ namespace Aspect.Net
 
         public static string GetProxyMethodName(string methodName)
         {
-            return methodName + Guid.NewGuid().ToString("N");
+            return Guid.NewGuid().ToString("N");
         }
 
-
-        internal static Expression<Func<RuntimeMethodHandle, MethodBase>> GetHandleMethodFunc = handle => MethodBase.GetMethodFromHandle(handle);
+        private static readonly Expression<Func<RuntimeMethodHandle, MethodBase>> GetHandleMethodFunc = handle => MethodBase.GetMethodFromHandle(handle);
 
         public static readonly MethodInfo GetHandleMethod = (GetHandleMethodFunc.Body as MethodCallExpression)?.Method;
     }
