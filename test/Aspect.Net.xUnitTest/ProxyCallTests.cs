@@ -63,7 +63,7 @@ namespace Aspect.Net.xUnitTest
             var a = proxy.Create<ClassA>();
 
             var act = await a.CallBoolReturnAsync();
-                
+
             Assert.False(act);
         }
 
@@ -80,6 +80,23 @@ namespace Aspect.Net.xUnitTest
             var act = await a.CallBoolReturnAsync();
 
             Assert.True(act);
+        }
+
+
+        [Fact]
+        public async Task CustomCreate_ClassA_CallAsync_String()
+        {
+            var str = Guid.NewGuid().ToString();
+            var proxy = new Proxy(new DefaultAspect(async ctx =>
+            {
+                await ctx.InvokeAsync();
+                ctx.ReturnValue = str;
+            }));
+            var a = proxy.Create<ClassA>();
+
+            var act = await a.CallStrReturnAsync();
+
+            Assert.Equal(str, act);
         }
     }
 }

@@ -22,5 +22,11 @@ namespace Aspect.Net.TestModel
             await Task.Delay(2000);
             return false;
         }
+
+        public virtual async Task<string> CallStrReturnAsync()
+        {
+            await Task.Delay(100);
+            return "hi";
+        }
     }
 }
