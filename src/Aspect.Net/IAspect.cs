@@ -7,6 +7,6 @@ namespace Aspect.Net
 {
     public interface IAspect
     {
-        Task InvokeAsync(AspectContext context);
+        Task<T> InvokeAsync<T>(AspectContext context);
     }
 }

@@ -15,6 +15,7 @@ namespace Aspect.Net
             ProxyMethod = proxyMethod;
             Instance = instance;
             Arguments = arguments;
+            ReturnType = ProxyMethod.ReturnType;
         }
         public object[] Arguments { get; set; }
 
@@ -24,15 +25,21 @@ namespace Aspect.Net
 
         public object ReturnValue { get; set; }
 
+        public Type ReturnType { get; }
+
         public async Task InvokeAsync()
         {
             var method = ProxyMethod;
             var arguments = Arguments;
             var instance = Instance;
             var del = method.BuildDynamicDelegate(instance);
-            if (method.ReturnType == typeof(Task))
+            if (ReturnType == typeof(Task))
             {
                 await (Task)del.DynamicInvoke(arguments);
+            }
+            else if (ReturnType.IsGenericType && ReturnType.BaseType == typeof(Task))
+            {
+                ReturnValue = await (dynamic)del.DynamicInvoke(arguments);
             }
             else
             {

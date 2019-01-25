@@ -54,10 +54,10 @@ namespace Aspect.Net
             }
 
             #region DefineRealProxy
-            var proxyMethodBuilder = typeBuilder.DefineMethod(AspectConsts.GetProxyMethodName(methodInfo.Name), 
+            var proxyMethodBuilder = typeBuilder.DefineMethod(AspectConsts.GetProxyMethodName(methodInfo.Name),
                 AspectConsts.InternalMethodAttributes,
-                methodInfo.CallingConvention, 
-                methodInfo.ReturnType, 
+                methodInfo.CallingConvention,
+                methodInfo.ReturnType,
                 methodInfo.GetParameterTypes());
             var ilGenerator = proxyMethodBuilder.GetILGenerator();
             var parameters = methodInfo.GetParameters();
@@ -109,17 +109,28 @@ namespace Aspect.Net
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldfld, aspectField);
             il.Emit(OpCodes.Ldloc_1);
-            il.Emit(OpCodes.Callvirt, typeof(IAspect).GetMethod("InvokeAsync"));
+            var invokeMethod = typeof(IAspect).GetMethod("InvokeAsync");
+            var rtnType = methodInfo.ReturnType;
+            invokeMethod = invokeMethod?.MakeGenericMethod(GetGenericType(rtnType));
+            il.Emit(OpCodes.Callvirt, invokeMethod);
             //il.DeclareLocal(typeof(Task));
             //il.Emit(OpCodes.Stloc_2);
-
             if (methodInfo.ReturnType == typeof(void))
             {
                 // void
                 il.Emit(OpCodes.Pop);
                 il.Emit(OpCodes.Ret);
+                return typeBuilder;
             }
-            if (methodInfo.ReturnType == typeof(Task))
+            if (methodInfo.ReturnType.IsValueType)
+            {
+                var method = typeof(Task<>).MakeGenericType(rtnType).GetProperty("Result").GetGetMethod();
+                il.Emit(OpCodes.Callvirt, method);
+                il.Emit(OpCodes.Ret);
+                return typeBuilder;
+            }
+
+            if (methodInfo.ReturnType == typeof(Task) || rtnType.BaseType == typeof(Task))
             {
                 il.Emit(OpCodes.Ret);
             }
@@ -132,10 +143,22 @@ namespace Aspect.Net
                 {
                     il.Emit(OpCodes.Unbox_Any, methodInfo.ReturnType);
                 }
+                il.Emit(OpCodes.Ret);
             }
-
-            il.Emit(OpCodes.Ret);
             return typeBuilder;
+        }
+
+        private Type GetGenericType(Type rtnType)
+        {
+            if (rtnType == typeof(Task))
+            {
+                return typeof(object);
+            }
+            if (rtnType.BaseType == typeof(Task))
+            {
+                return rtnType.GenericTypeArguments.First();
+            }
+            return rtnType == typeof(void) ? typeof(object) : rtnType;
         }
 
         private void DefineConstructor(TypeBuilder typeBuilder, FieldBuilder aspectField)

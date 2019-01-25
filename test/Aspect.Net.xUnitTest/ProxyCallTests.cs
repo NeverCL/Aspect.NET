@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Aspect.Net.TestModel;
@@ -19,7 +20,7 @@ namespace Aspect.Net.xUnitTest
         }
 
         [Fact]
-        public void DefaultCreate_ClassA_Call_True()
+        public void CustomCreate_ClassA_Call_True()
         {
             var proxy = new Proxy(new DefaultAspect(ctx =>
             {
@@ -53,6 +54,32 @@ namespace Aspect.Net.xUnitTest
             var act = (DateTime.Now - time).TotalMilliseconds;
 
             Assert.True(act > 2000);
+        }
+
+        [Fact]
+        public async Task DefaultCreate_ClassA_CallAsync_False()
+        {
+            var proxy = new Proxy(new DefaultAspect());
+            var a = proxy.Create<ClassA>();
+
+            var act = await a.CallBoolReturnAsync();
+                
+            Assert.False(act);
+        }
+
+        [Fact]
+        public async Task CustomCreate_ClassA_CallAsync_True()
+        {
+            var proxy = new Proxy(new DefaultAspect(async ctx =>
+            {
+                await ctx.InvokeAsync();
+                ctx.ReturnValue = true;
+            }));
+            var a = proxy.Create<ClassA>();
+
+            var act = await a.CallBoolReturnAsync();
+
+            Assert.True(act);
         }
     }
 }

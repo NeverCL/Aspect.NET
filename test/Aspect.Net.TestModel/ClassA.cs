@@ -16,5 +16,11 @@ namespace Aspect.Net.TestModel
         {
             await Task.Delay(2000);
         }
+
+        public virtual async Task<bool> CallBoolReturnAsync()
+        {
+            await Task.Delay(2000);
+            return false;
+        }
     }
 }
