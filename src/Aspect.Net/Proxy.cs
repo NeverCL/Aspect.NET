@@ -110,15 +110,22 @@ namespace Aspect.Net
             il.Emit(OpCodes.Ldfld, aspectField);
             il.Emit(OpCodes.Ldloc_1);
             il.Emit(OpCodes.Callvirt, typeof(IAspect).GetMethod("InvokeAsync"));
-            il.DeclareLocal(typeof(Task));
-            il.Emit(OpCodes.Stloc_2);
+            //il.DeclareLocal(typeof(Task));
+            //il.Emit(OpCodes.Stloc_2);
 
             if (methodInfo.ReturnType == typeof(void))
             {
                 // void
+                il.Emit(OpCodes.Pop);
+                il.Emit(OpCodes.Ret);
+            }
+            if (methodInfo.ReturnType == typeof(Task))
+            {
+                il.Emit(OpCodes.Ret);
             }
             else
             {
+                il.Emit(OpCodes.Pop);
                 il.Emit(OpCodes.Ldloc_1);
                 il.Emit(OpCodes.Call, typeof(AspectContext).GetProperty("ReturnValue").GetGetMethod());
                 if (methodInfo.ReturnType.IsValueType)

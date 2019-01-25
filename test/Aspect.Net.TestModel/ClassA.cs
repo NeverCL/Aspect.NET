@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Aspect.Net.TestModel
 {
@@ -9,6 +10,11 @@ namespace Aspect.Net.TestModel
         public virtual bool Call()
         {
             return false;
+        }
+
+        public virtual async Task CallAsync()
+        {
+            await Task.Delay(2000);
         }
     }
 }

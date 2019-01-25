@@ -32,11 +32,7 @@ namespace Aspect.Net
             var del = method.BuildDynamicDelegate(instance);
             if (method.ReturnType == typeof(Task))
             {
-                //taskFunc = (Func<Task>)Delegate.CreateDelegate(typeof(Func<Task>), instance, method);
-                //taskFunc = method.CreateDelegate(typeof(Func<Task>),null);
-                //await taskFunc();
-                //await (Task)method.Invoke(instance, arguments);
-                await (Task) del.DynamicInvoke(arguments);
+                await (Task)del.DynamicInvoke(arguments);
             }
             else
             {

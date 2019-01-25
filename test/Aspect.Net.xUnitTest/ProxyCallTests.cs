@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Aspect.Net.TestModel;
 using Xunit;
@@ -39,6 +40,19 @@ namespace Aspect.Net.xUnitTest
             var a = proxy.Create<ClassA>();
 
             Assert.False(a.Call());
+        }
+
+        [Fact]
+        public async Task DefaultCreate_ClassA_CallAsync()
+        {
+            var proxy = new Proxy(new DefaultAspect());
+            var a = proxy.Create<ClassA>();
+
+            var time = DateTime.Now;
+            await a.CallAsync();
+            var act = (DateTime.Now - time).TotalMilliseconds;
+
+            Assert.True(act > 2000);
         }
     }
 }
