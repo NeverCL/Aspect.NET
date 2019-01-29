@@ -15,6 +15,11 @@ namespace Aspect.Net
         private AssemblyBuilder _assemblyBuilder;
         private ModuleBuilder _moduleBuilder;
 
+        public Proxy(Func<AspectContext, Task> func)
+        {
+            _aspect = new DefaultAspect(func);
+        }
+
         public Proxy(IAspect defaultAspect = null)
         {
             _aspect = defaultAspect;
